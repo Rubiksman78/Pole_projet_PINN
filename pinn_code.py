@@ -12,15 +12,14 @@ DTYPE = 'float32'
 tf.keras.backend.set_floatx(DTYPE)
 ##Constantes à modifier (c:vitesse de l'onde,dimension:2D ou 3D,k : constante pour la gaussienne de l'onde à l'instant initial)
 c = 1
-dimension = 3
-k = 1
+dimension = 2
+w = np.pi*c*np.sqrt(2**2+3**2)
 
 ### u est la fonction que l'on cherche à modéliser u(t,x) avec t réel (temps) et x un vecteur de R2 ou R3
-#Initial condition
 def u0(t,x):
     x = tf.expand_dims(x[:,i],axis=-1)
-    z = x- c* t
-    return tf.sin(z) * tf.exp(-(k*z)**2) #Ici c'est un sinus modulé avec une gaussienne mais à modifier
+    x1,x2 = x[0],x[1]
+    return t - tf.exp(-((x1**2+x2**2))/2) #Ici c'est un sinus modulé avec une gaussienne mais à modifier
 
 #Initial condition on derivative
 def du0_dt(t,x):
@@ -37,13 +36,13 @@ def u_bound(t,x):
     return res
 
 #Residual of the PDE
-def residual(t,x,u,u_t,u_x,u_tt,u_xx):
+def residual(u_tt,u_xx):
     return u_xx - (1/c**2) * u_tt #L'équation est d²u/dx²=(1/c²)*d²u/dt² donc on prend le résidu r=d²u/dx²-(1/c²)*d²u/dt² et on veut r -> 0 
 
 #Number of points
 N_0 = 100 #Nombre de points pour la condition initiale
 N_b = 100 #Nombre de points pour la condition aux bords
-N_r = 5000 #Nombre de points pour le résidu (donc à l'intérieur du domaine)
+N_r = 10000 #Nombre de points pour le résidu (donc à l'intérieur du domaine)
 
 #Boundaries of the domain
 tmin,tmax = 0.,1.0
@@ -52,7 +51,7 @@ lb,ub = tf.constant([tmin,xmin],dtype=DTYPE),tf.constant([tmax,xmax],dtype=DTYPE
 
 #Initial conditions
 t_0 = tf.ones((N_0,1), dtype=DTYPE)*lb[0] #On fixe t à la valeur lb[0] donc t_0
-x_0 = tf.random.uniform((N_0,dimension), lb[1], ub[1], dtype=DTYPE) #On prend x_0 suivant une loi uniforme sur R2 ou R3
+x_0 = lb[1] + (ub[1] - lb[1]) * tf.zeros((N_b,dimension), dtype=DTYPE) #On prend x_0 suivant une loi uniforme sur R2 ou R3
 X_0 = t_0
 for i in range(dimension):
     X_0 = tf.concat([X_0, tf.expand_dims(x_0[:,i],axis=-1)], axis=1) #On prend X_0 = (t_0,x_0) qui sera celui utilisé pour donner directement toutes les variables au réseau de neurones
@@ -90,7 +89,6 @@ ax.set_zlabel('$x2$')
 
 ax.set_title('Positions of collocation points and boundary data')
 plt.show()
-
 #%%
 bound1 = [tmin] + [xmin for _ in range(dimension)]
 bound2 = [tmax] + [xmax for _ in range(dimension)]
@@ -101,12 +99,13 @@ def define_net(num_inputs,num_outputs):
     input = models.Input(shape=(num_inputs))
     scaling_layer = tf.keras.layers.Lambda(lambda x: 2.0*(x - lb)/(ub - lb) - 1.0) #Normalisation des points en [-1,1]
     x = scaling_layer(input) 
-    for neurons in [64,32,32,64]: #Ici 4 couches denses mais on peut en mettre moins
-        x = kl.Dense(neurons,activation='relu',kernel_initializer='glorot_normal')(x)
+    for neurons in [256]: #Ici 4 couches denses mais on peut en mettre moins
+        x = kl.Dense(neurons,activation='relu')(x)
     x = kl.Dense(num_outputs)(x)
     return models.Model(input,x)
 
 ##Obtention du résidu de l'équation en calculant les dérivées secondes (ou plutôt laplaciens dans R2 ou R3)
+@tf.function
 def get_r(model,X_r):#X_r est les points où l'on calcule le résidu
     with tf.GradientTape(persistent=True) as tape: 
         t = X_r[:,0] #t est la première composante
@@ -116,18 +115,18 @@ def get_r(model,X_r):#X_r est les points où l'on calcule le résidu
         for xi in x:
             tape.watch(xi) #on regarde chaque coordonnée spatiale
 
-        u = model(tf.stack([t]+[tf.expand_dims(xi,axis=-1) for xi in x],axis=1)) #on obtient le résultat du modèle (u prédit) sur (t,x1,x2,(x3))
+        u = model(tf.stack([t]+[xi for xi in x],axis=1)) #on obtient le résultat du modèle (u prédit) sur (t,x1,x2,(x3))
 
         u_t = tape.gradient(u,t) #On calcule les gradients de notre u prédit par rapport à t (du/dt)
         gradient_x = [tape.gradient(u,x[i]) for i in range(len(x))] #On calcule les gradients de u par rapport à chaque xi dans une liste (du/dxi)
-        u_x = tf.reduce_sum(gradient_x,axis=0) #divergence selon x (somme de ces gradients)
+        #u_x = tf.reduce_sum(gradient_x,axis=0) #divergence selon x (somme de ces gradients)
 
     u_tt = tape.gradient(u_t,t) #On calcule la dérivée seconde par rapport à t (d(du/dt)/dt) = (d²u/dt²)
     double_gradients_x = [tape.gradient(gradient_x[i],x[i]) for i in range(len(x))] #Pareil pour chaque xi d(du/dxi)/dxi = d²u/dxi²
     u_xx = tf.reduce_sum(double_gradients_x,axis=0) #laplacien selon x
     del tape
 
-    return residual(t,x,u,u_t,u_x,u_tt,u_xx) #On renvoie le résidu selon les dérivées qu'on vient de calculert
+    return residual(u_tt,u_xx) #On renvoie le résidu selon les dérivées qu'on vient de calculert
 
 ##La fonction de coût que notre réseau va chercher à minimiser
 def compute_loss(model,X_r,X_data,u_data):
@@ -157,7 +156,7 @@ opt = keras.optimizers.Adam(learning_rate=lr)
 epochs = 5000
 hist = []
 t0 = time()
-model = define_net(4,1)
+model = define_net(3,1)
 
 #Boucle d'entrainement
 def train():
@@ -172,41 +171,46 @@ def train():
 
 train() 
 # %%
-
+from matplotlib import cm
+from matplotlib.ticker import LinearLocator
 ###Affichage du résultat dans une grille 2D ou 3D
-N = 20
+N = 70
 fps = 5
 tspace = np.linspace(lb[0], ub[0], N + 1)
 x1space = np.linspace(lb[1], ub[1], N + 1)
 x2space = np.linspace(lb[2], ub[2], N + 1)
-x3space = np.linspace(lb[2], ub[2], N + 1) #On échantillonne les composantes entre les bords avec N+1 points
+#x3space = np.linspace(lb[2], ub[2], N + 1) #On échantillonne les composantes entre les bords avec N+1 points
 
-T,X1, X2,X3 = np.meshgrid(tspace,x1space, x2space,x3space) #Découpage d'une grille de points
-Xgrid = np.vstack([T.flatten(),X1.flatten(),X2.flatten(),X3.flatten()]).T
+T,X1, X2 = np.meshgrid(tspace,x1space, x2space) #Découpage d'une grille de points
+Xgrid = tf.stack([T.flatten(),X1.flatten(),X2.flatten()],axis=-1)
 
 # Determine predictions of u(t, x)
 upred = model(tf.cast(Xgrid,DTYPE))
 
-U = upred.numpy().reshape(N+1,N+1,N+1,N+1)
-z_array = np.zeros((N+1,N+1,N+1,N+1))
+U = upred.numpy().reshape(N+1,N+1,N+1)
+z_array = np.zeros((N+1,N+1,N+1))
 for i in range(N+1):
-    z_array[:,:,:,i]= U[i]
+    z_array[:,:,i]= U[i]
 
 def update_plot(frame_number, zarray, plot):
     plot[0].remove()
-    #plot[0] = ax.plot_surface(X1, X2, zarray[:,:,frame_number], cmap="magma")
-    plot[0] = ax.scatter(X1, X2,X3, c=zarray[:,:,:,frame_number])
+    plot[0] = ax.plot_surface(X1, X2,zarray[:,:,frame_number],cmap=cm.coolwarm,
+                       linewidth=0)
 
-X1, X2,X3 = np.meshgrid(x1space, x2space,x3space)
+X1, X2 = np.meshgrid(x1space, x2space)
 fig = plt.figure(figsize=(18,12))
-ax = fig.add_subplot(111,projection='3d')
-#plot = [ax.plot_surface(X1, X2, z_array[:,:,0], cmap='magma',rstride=1,cstride=1)]
-plot = [ax.scatter(X1, X2,X3, c=z_array[:,:,:,0])]
+ax = fig.add_subplot(projection='3d')
+plot = [ax.plot_surface(X1, X2,z_array[:,:,0],cmap=cm.coolwarm,
+                       linewidth=0, rstride=1, cstride=1)]
 ax.set_xlabel('$x1$')
 ax.set_ylabel('$x2$')
 ax.set_zlabel('$u_\\theta(x1,x2)$')
-ax.set_title('SolutioPoln of Wave equation')
-
+ax.set_zlim(0, 1.1)
+ax.zaxis.set_major_locator(LinearLocator(10))
+ax.zaxis.set_major_formatter('{x:.02f}')
+ax.set_title('Solution of Wave equation')
+fig.colorbar(plot[0])
+#%%
 plt.rcParams['animation.ffmpeg_path'] = "C:/SAMUEL/ffmpeg-5.0-full_build/ffmpeg-5.0-full_build/bin/ffmpeg.exe" #Faut installer un truc sombre pour faire l'animation vidéo, pas important
 anim = animation.FuncAnimation(fig,update_plot,N+1,fargs=(z_array,plot),interval=1000/fps)
 fn = 'plot_surface_animation_funcanimation'
