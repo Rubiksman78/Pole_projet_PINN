@@ -19,7 +19,12 @@ w = np.pi*c*np.sqrt(2**2+3**2)
 
 tmin,tmax = 0.,1.0
 xmin,xmax = -1.,1.
-X_data,u_data,time_x,X_r = set_training_data(tmin,tmax,xmin,xmax,dimension)
+#Number of points
+N_0 = 1000 #Nombre de points pour la condition initiale
+N_b = 1000 #Nombre de points pour la condition aux bords
+N_r = 10000 #Nombre de points pour le résidu (donc à l'intérieur du domaine)
+
+X_data,u_data,time_x,X_r = set_training_data(tmin,tmax,xmin,xmax,dimension,N_0,N_b,N_r)
 
 plot_training_points(dimension,time_x)
 #%%

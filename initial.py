@@ -34,12 +34,7 @@ def domain_boundaries(tmin,tmax,xmin,xmax):
     lb,ub = tf.constant([tmin,xmin],dtype=DTYPE),tf.constant([tmax,xmax],dtype=DTYPE) #Frontières basse et haute pour toute variable
     return lb,ub 
 
-def set_training_data(tmin,tmax,xmin,xmax,dimension):
-    #Number of points
-    N_0 = 1000 #Nombre de points pour la condition initiale
-    N_b = 1000 #Nombre de points pour la condition aux bords
-    N_r = 10000 #Nombre de points pour le résidu (donc à l'intérieur du domaine)
-
+def set_training_data(tmin,tmax,xmin,xmax,dimension,N_0,N_b,N_r):
     lb,ub = domain_boundaries(tmin,tmax,xmin,xmax)
 
     #Initial conditions
