@@ -15,7 +15,6 @@ def define_net(num_inputs,num_outputs,ub,lb):
     return models.Model(input,x)
 
 class PINN(models.Model):
-
     def __init__(self,num_inputs,num_outputs,dimension,ub,lb,c,**kwargs):
         super().__init__(**kwargs)
         self.model = define_net(num_inputs,num_outputs,ub,lb)

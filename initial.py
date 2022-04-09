@@ -103,6 +103,5 @@ def plot_training_points(dimension,time_x):
         ax.set_ylabel('$x1$')
         ax.set_zlabel('$x2$')
 
-    
     ax.set_title('Positions of collocation points and boundary data')
     plt.show()
