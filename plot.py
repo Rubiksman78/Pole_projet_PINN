@@ -77,7 +77,7 @@ def plot3d(lb,ub,N,tspace,model,fps):
     ax.set_xlabel('$x1$')
     ax.set_ylabel('$x2$')
     ax.set_zlabel('$x3$')
-    ax.set_title('SolutioPoln of Wave equation')
+    ax.set_title('Solution of Wave equation')
 
     plt.rcParams['animation.ffmpeg_path'] = "C:/SAMUEL/ffmpeg-5.0-full_build/ffmpeg-5.0-full_build/bin/ffmpeg.exe" #Faut installer un truc sombre pour faire l'animation vidéo, pas important
     anim = animation.FuncAnimation(fig,update_plot,N+1,fargs=(z_array,plot),interval=1000/fps)

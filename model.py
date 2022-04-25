@@ -9,15 +9,47 @@ def define_net(num_inputs,num_outputs,ub,lb):
     input = models.Input(shape=(num_inputs))
     scaling_layer = tf.keras.layers.Lambda(lambda x: 2.0*(x - lb)/(ub - lb) - 1.0) #Normalisation des points en [-1,1]
     x = scaling_layer(input) 
-    for neurons in [32,256,32]: #Ici 4 couches denses mais on peut en mettre moins
+    for neurons in [64,256,256,64]: #Ici 4 couches denses mais on peut en mettre moins
         x = kl.Dense(neurons,activation='tanh')(x)
     x = kl.Dense(num_outputs)(x)
     return models.Model(input,x)
+
+class TransformerBlock(kl.Layer):
+    def __init__(self,embed_dim,num_heads,ff_dim,rate=0.1):
+        super(TransformerBlock,self).__init__()
+        self.att = kl.MultiHeadAttention(num_heads=num_heads,key_dim=embed_dim,)
+        self.ffn = keras.Sequential([
+            kl.Dense(ff_dim,activation='relu'),
+            kl.Dense(embed_dim),
+                    ])
+        self.layernorm1 = kl.LayerNormalization(epsilon=1e-6)
+        self.layernorm2 = kl.LayerNormalization(epsilon=1e-6)
+        self.dropout1 = kl.Dropout(rate)
+        self.dropout2 = kl.Dropout(rate)
+
+    def call(self,inputs,training):
+        attn_output = self.att(inputs,inputs)
+        attn_output = self.dropout1(attn_output,training=training)
+        out1 = self.layernorm1(inputs + attn_output)
+        ffn_output = self.ffn(out1)
+        ffn_output = self.dropout2(ffn_output,training=training)
+        return self.layernorm2(out1 + ffn_output)
+
+def transformer_model(embed_dim,num_heads,ff_dim,features):
+    inputs = models.Input(shape=(features,))
+    x = TransformerBlock(embed_dim,num_heads,ff_dim)(inputs)
+    for _ in range(3):
+        x = TransformerBlock(embed_dim,num_heads,ff_dim)(x)
+    x = kl.GlobalAveragePooling1D()(x)
+    x = kl.Dropout(0.1)(x)
+    x = kl.Dense(1,activation='linear')(x)
+    return models.Model(inputs,x)
 
 class PINN(models.Model):
     def __init__(self,num_inputs,num_outputs,dimension,ub,lb,c,**kwargs):
         super().__init__(**kwargs)
         self.model = define_net(num_inputs,num_outputs,ub,lb)
+        #self.model = transformer_model(64,4,64,num_inputs)
         self.dimension = dimension
         self.c = c
 
@@ -28,10 +60,11 @@ class PINN(models.Model):
     ##Obtention du résidu de l'équation en calculant les dérivées secondes (ou plutôt laplaciens dans R2 ou R3)
     @tf.function
     def get_r(self,X_r):#X_r est les points où l'on calcule le résidu
-        with tf.GradientTape(persistent=True) as tape: 
+        with tf.GradientTape() as tape: 
             t = X_r[:,0] #t est la première composante
+            #t = tf.gather(X_r,0,axis=1)
             x = [X_r[:,i] for i in range(1,self.dimension+1)] #x est le reste des composantes spatiales dans une liste
-
+            #x = [tf.gather(X_r,i,axis=1) for i in range(1,self.dimension+1)]
             tape.watch(t) #on regarde t
             for xi in x:
                 tape.watch(xi) #on regarde chaque coordonnée spatiale

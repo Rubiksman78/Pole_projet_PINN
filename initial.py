@@ -7,22 +7,20 @@ tf.keras.backend.set_floatx(DTYPE)
 
 ### u est la fonction que l'on cherche à modéliser u(t,x) avec t réel (temps) et x un vecteur de R2 ou R3
 def u0(t,x):
-    return t + 3*tf.sin(np.pi*x/2) #Ici c'est un sinus modulé avec une gaussienne mais à modifier
+    return t + tf.sin(np.pi*x/2) #Ici c'est un sinus modulé avec une gaussienne mais à modifier
 
 #Initial condition on derivative
 def du0_dt(t,x):
-    """
     with tf.GradientTape() as tape: #module pour calculer des gradients
         tape.watch(t) #regarder la variable par rapport à laquelle on veut dériver
         u = u0(t,x) #on récupère la condition initiale 
     du_dt = tape.gradient(u,t) #on calcule les gradients de u par rapport à t (i.e. vitesse par exemple)
-    """
-    return t + 0.5*tf.sin(np.pi*x) #Ici c'est un sinus modulé avec une gaussienne mais à modifier
+    return du_dt #Ici c'est un sinus modulé avec une gaussienne mais à modifier
 
 #Boundary condition
-def u_bound(t,x):
+def u_bound(t,x,dimension):
     n = x.shape[0]
-    res = tf.zeros((n,1), dtype=DTYPE) #Ici c'est juste u=0 aux bords
+    res = tf.zeros((n,dimension), dtype=DTYPE) #Ici c'est juste u=0 aux bords
     return res
 
 #Residual of the PDE
@@ -52,7 +50,7 @@ def set_training_data(tmin,tmax,xmin,xmax,dimension,N_0,N_b,N_r):
     X_b = t_b
     for i in range(dimension):
         X_b = tf.concat([X_b, tf.expand_dims(x_b[:,i],axis=-1)], axis=1) #Pareil on prend X_b = (t_b,x_b) pour le modèle
-    u_b = u_bound(t_b,x_b)
+    u_b = u_bound(t_b,x_b,dimension)
 
     #Residual of the equation
     t_r = tf.random.uniform((N_r,1), lb[0], ub[0], dtype=DTYPE) 
@@ -62,8 +60,8 @@ def set_training_data(tmin,tmax,xmin,xmax,dimension,N_0,N_b,N_r):
         X_r = tf.concat([X_r, tf.expand_dims(x_r[:,i],axis=-1)], axis=1) #Idem X_r = (t_r,x_r) pour le modèle
 
     #Training data
-    X_data = [X_0,X_0,X_b] #Les points d'entrainement sont les points limites (bords et à l'instant initial)
-    u_data = [u_0,v_0,u_b] #Les données d'entrainement visées sont les valeurs de u en ces points
+    X_data = [X_0,X_b] #Les points d'entrainement sont les points limites (bords et à l'instant initial)
+    u_data = [u_0,u_b] #Les données d'entrainement visées sont les valeurs de u en ces points
 
     time_x = [t_0,t_b,t_r,x_0,x_b,x_r,u_0,u_b]
     return X_data,u_data,time_x,X_r
