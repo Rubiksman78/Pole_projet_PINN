@@ -11,12 +11,12 @@ DTYPE = 'float32'
 tf.keras.backend.set_floatx(DTYPE)
 
 ##Constantes à modifier (c:vitesse de l'onde,dimension:2D ou 3D,k : constante pour la gaussienne de l'onde à l'instant initial)
-c = 1
+c = 2
 dimension = 1
 w = np.pi*c*np.sqrt(2**2+3**2)
 
-tmin,tmax = 0.,1.0
-xmin,xmax = -1.,1.
+tmin,tmax = 0.,1.
+xmin,xmax = 0.,1.
 
 def train():
     #Number of points
@@ -25,10 +25,10 @@ def train():
     #N_r = 10000 #Nombre de points pour le résidu (donc à l'intérieur du domaine)
     N_b = 1000
     N_0 = 1000
-    N_r = 5000
+    N_r = 100000
     X_data,u_data,time_x,X_r = set_training_data(tmin,tmax,xmin,xmax,dimension,N_0,N_b,N_r)
 
-    #plot_training_points(dimension,time_x)
+    plot_training_points(dimension,time_x)
 
     bound1 = [tmin] + [xmin for _ in range(dimension)]
     bound2 = [tmax] + [xmax for _ in range(dimension)]
@@ -110,4 +110,28 @@ fps = 5
 tspace = np.linspace(lb[0], ub[0], N + 1)
 
 plot1d(lb,ub,N,tspace,model,fps)
+# %%
+def plot1d(lb,ub,N,tspace,model,fps):
+    ###1D Wave
+    x1space = np.linspace(lb[1], ub[1], N + 1)
+
+    T,X1 = np.meshgrid(tspace,x1space)
+    Xgrid = tf.stack([T.flatten(),X1.flatten()],axis=-1)
+
+    upred = model(tf.cast(Xgrid,DTYPE))
+    U = upred.numpy().reshape(N+1,N+1)
+    z_array = np.zeros((N+1,N+1))
+    for i in range(N):
+        z_array[:,i]= U[i]
+
+    plt.style.use('dark_background')
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.scatter(T,X1,c=U, marker='X', vmin=0, vmax=1)
+    ax.set_xlabel('$t$')
+    ax.set_ylabel('$x1$')
+    plt.show()
+
+plot1d(lb,ub,N,tspace,model,fps)      
 # %%

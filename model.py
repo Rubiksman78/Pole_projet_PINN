@@ -9,8 +9,8 @@ def define_net(num_inputs,num_outputs,ub,lb):
     input = models.Input(shape=(num_inputs))
     scaling_layer = tf.keras.layers.Lambda(lambda x: 2.0*(x - lb)/(ub - lb) - 1.0) #Normalisation des points en [-1,1]
     x = scaling_layer(input) 
-    for neurons in [64,256,256,64]: #Ici 4 couches denses mais on peut en mettre moins
-        x = kl.Dense(neurons,activation='tanh')(x)
+    for neurons in [64,256,64]: #Ici 4 couches denses mais on peut en mettre moins
+        x = kl.Dense(neurons,activation='relu')(x)
     x = kl.Dense(num_outputs)(x)
     return models.Model(input,x)
 
@@ -60,7 +60,7 @@ class PINN(models.Model):
     ##Obtention du résidu de l'équation en calculant les dérivées secondes (ou plutôt laplaciens dans R2 ou R3)
     @tf.function
     def get_r(self,X_r):#X_r est les points où l'on calcule le résidu
-        with tf.GradientTape() as tape: 
+        with tf.GradientTape(persistent=True) as tape: 
             t = X_r[:,0] #t est la première composante
             #t = tf.gather(X_r,0,axis=1)
             x = [X_r[:,i] for i in range(1,self.dimension+1)] #x est le reste des composantes spatiales dans une liste
@@ -88,8 +88,19 @@ class PINN(models.Model):
         phi_r = tf.reduce_mean(tf.square(res)) #MSE (mean squarred error = somme des erreurs²) sur le résidu
         loss = phi_r 
         for i in range(len(X_data)):
-            u_pred = self.model(X_data[i]) #On prédit le résultat sur les points au bord
-            loss += tf.reduce_mean(tf.square(u_data[i] - u_pred)) #On ajoute à notre coût Somme((u_bord_prédit-u_bord_réel)²)
+            if i != 2:
+                u_pred = self.model(X_data[i]) #On prédit le résultat sur les points au bord
+                loss += tf.reduce_mean(tf.square(u_data[i] - u_pred)) #On ajoute à notre coût Somme((u_bord_prédit-u_bord_réel)²)
+            else:
+                with tf.GradientTape() as tape: 
+                    t = X_data[i][:,0]
+                    tape.watch(t)
+                    x = [X_data[i][:,j] for j in range(1,self.dimension+1)]
+                    for xi in x:
+                        tape.watch(xi)
+                    u_pred = self.model(tf.stack([t]+[xi for xi in x],axis=1)) #On prédit le résultat sur les points au bord
+                v_pred = tape.gradient(u_pred,t) 
+                loss += tf.reduce_mean(tf.square(u_data[i] - tf.expand_dims(v_pred,axis=-1)))
         return loss
 
     ##train_step représente ce qu'on fait à chaque étape de l'entraînement
