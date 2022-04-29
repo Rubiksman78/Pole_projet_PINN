@@ -60,7 +60,7 @@ class PINN(models.Model):
     ##Obtention du résidu de l'équation en calculant les dérivées secondes (ou plutôt laplaciens dans R2 ou R3)
     @tf.function
     def get_r(self,X_r):#X_r est les points où l'on calcule le résidu
-        with tf.GradientTape() as tape: 
+        with tf.GradientTape(persistent=True) as tape: 
             t = X_r[:,0] #t est la première composante
             #t = tf.gather(X_r,0,axis=1)
             x = [X_r[:,i] for i in range(1,self.dimension+1)] #x est le reste des composantes spatiales dans une liste
