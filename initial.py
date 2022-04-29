@@ -1,14 +1,13 @@
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
-from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 DTYPE = 'float32'
 tf.keras.backend.set_floatx(DTYPE)
 
 ### u est la fonction que l'on cherche à modéliser u(t,x) avec t réel (temps) et x un vecteur de R2 ou R3
 def u0(t,x):
-    return t + (tf.sin(np.pi*x) + 0.5*tf.sin(4*np.pi*x))
+    return t + 1*(tf.sin(np.pi*x) + 0.5*tf.sin(4*np.pi*x))
 
 #Speed intial condition
 def v0(t,x,dimension):

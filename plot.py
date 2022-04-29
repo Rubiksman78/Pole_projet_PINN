@@ -110,7 +110,8 @@ def plot1d(lb,ub,N,tspace,model,fps):
         k += 1
         ax1.clear()
         plt.plot(x1space,x,color='cyan')
-
+        plt.ylim([-5,5])
+        plt.xlim([0,1.0])
     plt.rcParams['animation.ffmpeg_path'] = "C:/SAMUEL/ffmpeg-5.0-full_build/ffmpeg-5.0-full_build/bin/ffmpeg.exe" #Faut installer un truc sombre pour faire l'animation vidéo, pas important
     anim = animation.FuncAnimation(fig,animate,frames=N,interval=20)
     fn = 'plot_1d_animation_funcanimation'
