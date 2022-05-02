@@ -37,7 +37,7 @@ def train(epochs,pinn,X_r,X_data,u_data,f_real,N,dimension):
             val_loss = pinn.test_step(X_test,f_real)
             print(f"It {i}: val_loss : {val_loss}")
         if (i+1) % 2000 ==0:
-            pinn.model.save_weights('pinn2.h5')
+            pinn.model.save_weights('weights/pinn2.h5')
         if (i+1) % 2000 ==0:
             if dimension == 1:
                 plot1dgrid(lb,ub,N,pinn.model,i)
@@ -110,7 +110,7 @@ if __name__ == '__main__':
     hist = []
     pinn = PINN(dimension+1,1,dimension,ub,lb,c)
     pinn.compile(opt)
-    #pinn.model.load_weights('pinn1.h5')
+    pinn.model.load_weights('weights/pinn1.h5')
     train(epochs,pinn,X_r,X_data,u_data,true_u,N=50,dimension=dimension)
 
 #%%

@@ -140,5 +140,5 @@ def plot1dgrid(lb,ub,N,model,i):
     ax.scatter(T,X1,c=U, marker='X', vmin=-1, vmax=1)
     ax.set_xlabel('$t$')
     ax.set_ylabel('$x1$')
-    plt.savefig(f'generated_{i}')
+    plt.savefig(f'results/generated_{i}')
     plt.close()
