@@ -2,29 +2,17 @@ import tensorflow as tf
 import numpy as np
 from initial import *
 
-def compute_Kuu(x,Ju):
+def compute_Ki(x,Ju):
     D = tf.shape(x)[0]
-    Kuu = tf.zeros((D,D))
+    Ki = tf.zeros((D,D))
     for x in Ju:
         if x == None:
             continue
         else:
             J = tf.reshape(x,shape=(D,-1))
             K = tf.matmul(J,J,transpose_b=True)
-            Kuu = Kuu + K
-    return Kuu
-
-def compute_Krr(x,Jr):
-    D = tf.shape(x)[0]
-    Krr = tf.zeros((D,D))
-    for x in Jr:
-        if x == None:
-            continue
-        else:                
-            J = tf.reshape(x,shape=(D,-1))
-            K = tf.matmul(J,J,transpose_b=True)
-            Krr = Krr + K
-    return Krr
+            Ki = Ki + K
+    return Ki
 
 def compute_K(Ju,Jr):
     a = tf.concat([Ju,Jr],axis=1)
@@ -59,13 +47,10 @@ def compute_Jr(x,model,c,dimension):
         u_xx = tf.stack(d2f_dx2, axis=1)
         u_tt = u_xx[:,0]
         u_xx = tf.reduce_sum([u_xx[:,i] for i in range(1,dimension+1)],axis=0)
-        res = residual(u_tt,u_xx,c)
+        res = residual(x[:,0],x[:,1],gradient_x[:,0],u_tt,u_xx,c)
     Jr = tape3.jacobian(res,theta)
     return Jr
 
-def compute_eigen(Ku,Kr,iskr = True):
-    trace_K = tf.linalg.trace(Ku) + tf.linalg.trace(Kr)
-    if iskr:
-        return trace_K/tf.linalg.trace(Kr)
-    else:
-        return trace_K/tf.linalg.trace(Ku)
+def compute_eigen(Kuu,Krr,Kut,name):
+    trace_K = tf.linalg.trace(Kuu) + tf.linalg.trace(Krr) + tf.linalg.trace(Kut)
+    return trace_K / tf.linalg.trace(locals()[name])

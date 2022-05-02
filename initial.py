@@ -1,36 +1,17 @@
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
+from equation import *
 
 DTYPE = 'float32'
 tf.keras.backend.set_floatx(DTYPE)
-
-### u est la fonction que l'on cherche à modéliser u(t,x) avec t réel (temps) et x un vecteur de R2 ou R3
-def u0(t,x):
-    return t + 1*(tf.sin(np.pi*x) + 0.5*tf.sin(4*np.pi*x))
-
-#Speed intial condition
-def v0(t,x,dimension):
-    n = x.shape[0]
-    res = tf.zeros((n,dimension), dtype=DTYPE) #Ici c'est juste v=0 aux bords
-    return res
-
-#Boundary condition
-def u_bound(t,x,dimension):
-    n = x.shape[0]
-    res = tf.zeros((n,dimension), dtype=DTYPE) #Ici c'est juste u=0 aux bords
-    return res
-
-#Residual of the PDE
-def residual(u_tt,u_xx,c):
-    return u_xx - (1/c**2) * u_tt #L'équation est d²u/dx²=(1/c²)*d²u/dt² donc on prend le résidu r=d²u/dx²-(1/c²)*d²u/dt² et on veut r -> 0 
 
 def domain_boundaries(tmin,tmax,xmin,xmax):
     #Boundaries of the domain
     lb,ub = tf.constant([tmin,xmin],dtype=DTYPE),tf.constant([tmax,xmax],dtype=DTYPE) #Frontières basse et haute pour toute variable
     return lb,ub 
 
-def set_training_data(tmin,tmax,xmin,xmax,dimension,N_0,N_b,N_r):
+def set_training_data(tmin,tmax,xmin,xmax,dimension,N_0,N_b,N_r,speed=True):
     lb,ub = domain_boundaries(tmin,tmax,xmin,xmax)
 
     #Initial conditions
@@ -60,9 +41,12 @@ def set_training_data(tmin,tmax,xmin,xmax,dimension,N_0,N_b,N_r):
         X_r = tf.concat([X_r, tf.expand_dims(x_r[:,i],axis=-1)], axis=1) #Idem X_r = (t_r,x_r) pour le modèle
 
     #Training data
-    X_data = [X_0,X_b,X_0] #Les points d'entrainement sont les points limites (bords et à l'instant initial)
-    u_data = [u_0,u_b,v_0] #Les données d'entrainement visées sont les valeurs de u en ces points
-
+    if speed:
+        X_data = [X_0,X_b,X_0] #Les points d'entrainement sont les points limites (bords et à l'instant initial)
+        u_data = [u_0,u_b,v_0] #Les données d'entrainement visées sont les valeurs de u en ces points
+    else:
+        X_data = [X_0,X_b]
+        u_data = [u_0,u_b] 
     time_x = [t_0,t_b,t_r,x_0,x_b,x_r,u_0,u_b]
     return X_data,u_data,time_x,X_r
 
@@ -98,3 +82,4 @@ def plot_training_points(dimension,time_x):
 
     ax.set_title('Positions of collocation points and boundary data')
     plt.show()
+
