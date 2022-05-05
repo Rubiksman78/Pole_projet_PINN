@@ -119,7 +119,7 @@ def plot1d(lb,ub,N,tspace,model,fps):
     plt.show()
 
 #Plot solution and save the fig during the train
-def plot1dgrid(lb,ub,N,model,i):
+def plot1dgrid(lb,ub,N,model,k):
     ###1D Wave
     x1space = np.linspace(lb[1], ub[1], N + 1)
     tspace = np.linspace(lb[0], ub[0], N + 1)
@@ -140,5 +140,30 @@ def plot1dgrid(lb,ub,N,model,i):
     ax.scatter(T,X1,c=U, marker='X', vmin=-1, vmax=1)
     ax.set_xlabel('$t$')
     ax.set_ylabel('$x1$')
-    plt.savefig(f'results/generated_{i}')
+    plt.savefig(f'results/generated_{k}')
+    plt.close()
+
+#Plot solution and save the fig during the train
+def plot1dgrid_real(lb,ub,N,model,k):
+    ###1D Wave
+    x1space = np.linspace(lb[1], ub[1], N + 1)
+    tspace = np.linspace(lb[0], ub[0], N + 1)
+
+    T,X1 = np.meshgrid(tspace,x1space)
+    Xgrid = tf.stack([T.flatten(),X1.flatten()],axis=-1)
+
+    upred = model(Xgrid)
+    U = upred.reshape(N+1,N+1)
+    z_array = np.zeros((N+1,N+1))
+    for i in range(N):
+        z_array[:,i]= U[i]
+
+    plt.style.use('dark_background')
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.scatter(T,X1,c=U, marker='X', vmin=-1, vmax=1)
+    ax.set_xlabel('$t$')
+    ax.set_ylabel('$x1$')
+    plt.savefig(f'results/generated_{k}')
     plt.close()

@@ -6,16 +6,18 @@ from initial import *
 from kernel_upgrade import *
 
 ##Modèle allant de num_inputs(3 ou 4 en incluant le temps) -> num_outputs(1 car on veut un réel qui est u(t,x1,x2,(x3)))
-def define_net(num_inputs,num_outputs,ub,lb,n_layers = 3, n_neurons = 64):
+def define_net(num_inputs,num_outputs,ub,lb,n_layers = 8, n_neurons = 512):
     input = models.Input(shape=(num_inputs))
     scaling_layer = tf.keras.layers.Lambda(lambda x: 2.0*(x - lb)/(ub - lb) - 1.0) #Normalisation des points en [-1,1]
     x = scaling_layer(input) 
+    #x = kl.Dense(n_neurons,activation='tanh')(input)
     for _ in range(n_layers): #Ici 4 couches denses mais on peut en mettre moins
         x = kl.Dense(n_neurons,activation='tanh')(x)
+        x = kl.BatchNormalization()(x)
         #x = kl.GRU(neurons,return_sequences=True)(x)
     x = kl.Dense(num_outputs,activation='linear')(x)
     return models.Model(input,x)
-    
+
 class PINN(models.Model):
     def __init__(self,
     num_inputs,
@@ -89,7 +91,7 @@ class PINN(models.Model):
     ##train_step représente ce qu'on fait à chaque étape de l'entraînement
     def train_step(self,X_r,X_data,u_data,i,use_kernel = False):
         with tf.GradientTape() as tape:
-            if use_kernel and (i+1) % 1000 ==0:
+            if use_kernel and (i+1) % 100 ==0:
                 Ju = compute_Ju(tf.concat([X_data[0],X_data[1]],axis=0),self.model)
                 Jr = compute_Jr(X_r,self.model,self.c,self.dimension)
                 Jut = compute_Ju(X_data[2],self.model)

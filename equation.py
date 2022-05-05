@@ -23,7 +23,7 @@ def u_bound(t,x,dimension):
 #Residual of the PDE
 def residual(t,x,u_t,u_tt,u_xx,c):
     #return u_t - u_xx + tf.exp(-t)*(tf.sin(np.pi*x)-np.pi**2*np.sin(np.pi*x))
-    return u_xx - (1/c**2) * u_tt #L'équation est d²u/dx²=(1/c²)*d²u/dt² donc on prend le résidu r=d²u/dx²-(1/c²)*d²u/dt² et on veut r -> 0 
+    return u_tt - (c**2)*u_xx #L'équation est d²u/dx²=(1/c²)*d²u/dt² donc on prend le résidu r=d²u/dx²-(1/c²)*d²u/dt² et on veut r -> 0 
 
 #True solution to compare with prediction
 def true_u(x,a=0.5,c=2):
