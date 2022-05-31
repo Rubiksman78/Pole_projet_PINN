@@ -3,10 +3,10 @@ import numpy as np
 import tensorflow as tf
 from tensorflow import keras
 from time import time
-from initial import *
-from model import *
-from plot import * 
-from equation import *
+from physics.initial import *
+from models.model import *
+from utils.plot import * 
+from physics.equation import *
 from config import *
 from tqdm import tqdm
 #%%

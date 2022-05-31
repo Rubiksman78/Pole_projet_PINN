@@ -4,8 +4,8 @@ from turtle import width
 import numpy as np
 from pyparsing import col 
 from pinn_code import train
-from model import *
-from plot import * 
+from models.model import *
+from utils.plot import * 
 
 #action des boutons du cadre de l'équation
 def actionbuttonplus():
