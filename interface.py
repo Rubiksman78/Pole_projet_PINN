@@ -1,5 +1,6 @@
 from calendar import c
 from tkinter import *
+from turtle import width
 import numpy as np
 from pyparsing import col 
 from pinn_code import *
@@ -39,7 +40,7 @@ def actionbuttonz():
         valueequa.set(entreeequ.get() + 'z')
 
 def actionvalider():
-    c,a,dimension,tmin,tmax,xmin,xmax,N_b,N_r,N_0,lr,epochs = int(entreec.get()), 0.5, int(entreedim.get()), 0., 1., 0., 1., 500, 500, 500, 1e-5, 10
+    c,a,dimension,tmin,tmax,xmin,xmax,N_b,N_r,N_0,lr,epochs = int(entreec.get()), 0.5, int(entreedim.get()), 0., 1., 0., 1., int(entreeNb.get()), int(entreeNr.get()), int(entreeN0.get()), float(entreelr.get())*1e-5, int(entreeepochs.get())
     X_data,u_data,time_x,X_r = set_training_data(tmin,tmax,xmin,xmax,dimension,N_0,N_b,N_r)
     bound1 = [tmin] + [xmin for _ in range(dimension)]
     bound2 = [tmax] + [xmax for _ in range(dimension)]
@@ -76,6 +77,7 @@ labelc = Label(zonec, text="c :")
 labelc.pack(side= LEFT)
 valuec = StringVar() 
 entreec = Entry(zonec, textvariable=valuec, width=5)
+valuec.set('1')
 entreec.pack(side = RIGHT, padx= 15)
 zonec.pack(fill="both", expand="yes", side = LEFT)
 
@@ -136,8 +138,73 @@ equa.pack(side=BOTTOM)
 
 
 cadreentree.pack(side = LEFT)
-#cadresortie = Frame(top, border = 2, width = 50)
-#cadresortie.pack(side=RIGHT)
+
+cadredroit = Frame(top, border = 2, width = 50)
+l2 = LabelFrame(cadredroit, text="paramètres d'apprentissage", padx=20, pady=8)
+
+#sous-cadre pour récupérer épochs
+zoneepochs = Frame(l2)
+labelepochs = Label(zoneepochs, text="Nombre d'épochs :")
+labelepochs.pack(side= LEFT)
+valueepochs = StringVar()
+entreeepochs = Entry(zoneepochs, textvariable=valueepochs, width=5)
+valueepochs.set('1000')
+entreeepochs.pack(side = RIGHT, padx= 10)
+zoneepochs.pack(fill="both", expand="yes", side = TOP)
+
+#sous-cadre pour récupérer lr
+zonelr = Frame(l2)
+labellr = Label(zonelr, text="Pas d'apprentissage :")
+labellr.pack(side= LEFT)
+unit=Frame(zonelr)
+valuelr = StringVar()
+entreelr = Entry(unit, textvariable=valuelr, width=5)
+valuelr.set('1')
+entreelr.pack(side= LEFT, padx= 10)
+labelunit = Label(unit, text="e-5")
+labelunit.pack(side=RIGHT)
+unit.pack(side=RIGHT)
+zonelr.pack(fill="both", expand="yes", side = BOTTOM)
+
+
+l2.pack(fill="both", expand="yes", side= TOP)
+
+#sous-cadre pour récupérer Nb, N0, Nr
+Ns= LabelFrame(cadredroit, text="paramètres de représentation", padx=20, pady=5)
+topNs = Frame(Ns)
+zoneNb = Frame(topNs)
+labelNb = Label(zoneNb, text="Nombre de point aux limites :")
+labelNb.pack(side= LEFT)
+valueNb = StringVar()
+entreeNb = Entry(zoneNb, textvariable=valueNb, width=5)
+valueNb.set('500')
+entreeNb.pack(side = RIGHT, padx= 10)
+zoneNb.pack(fill="both", expand="yes", side = TOP)
+
+zoneN0 = Frame(topNs)
+labelN0 = Label(zoneN0, text="Points de conditions initiales :")
+labelN0.pack(side= LEFT)
+valueN0 = StringVar()
+entreeN0 = Entry(zoneN0, textvariable=valueN0, width=5)
+valueN0.set('500')
+entreeN0.pack(side = RIGHT, padx= 10)
+zoneN0.pack(fill="both", expand="yes", side = BOTTOM)
+
+topNs.pack(side=TOP)
+
+zoneNr = Frame(Ns)
+labelNr = Label(zoneNr, text="Nombre de points résiduels :")
+labelNr.pack(side= LEFT)
+valueNr = StringVar()
+entreeNr = Entry(zoneNr, textvariable=valueNr, width=5)
+valueNr.set('500')
+entreeNr.pack(side = RIGHT, padx= 10)
+zoneNr.pack(fill="both", expand="yes", side = BOTTOM)
+
+Ns.pack(side = BOTTOM)
+
+cadredroit.pack(side=RIGHT)
+
 
 top.pack(side=TOP)
 bottom.pack(side= BOTTOM)
