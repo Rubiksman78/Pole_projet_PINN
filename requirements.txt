@@ -1,0 +1,8 @@
+numpy
+tensorflow
+tqdm
+matplotlib
+calendar
+tkinter
+pyparsing
+ffmpeg

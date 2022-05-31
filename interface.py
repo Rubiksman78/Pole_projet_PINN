@@ -4,6 +4,9 @@ from turtle import width
 import numpy as np
 from pyparsing import col 
 from pinn_code import *
+from pinn_code import train
+from models.model import *
+from utils.plot import * 
 
 #lecture de l'équation entrée par l'utilisateur
 def cos(a):
@@ -52,6 +55,7 @@ def actionbuttonz():
 def actionvalider():
     c,a,dimension,tmin,tmax,xmin,xmax,N_b,N_r,N_0,lr,epochs = int(entreec.get()), 0.5, int(entreedim.get()), 0., 1., 0., 1., int(entreeNb.get()), int(entreeNr.get()), int(entreeN0.get()), float(entreelr.get())*1e-5, int(entreeepochs.get())
     X_data,u_data,time_x,X_r = set_training_data(tmin,tmax,xmin,xmax,dimension,N_0,N_b,N_r)
+    #plot_training_points(dimension,time_x)
     bound1 = [tmin] + [xmin for _ in range(dimension)]
     bound2 = [tmax] + [xmax for _ in range(dimension)]
     lb,ub = tf.constant(bound1,dtype=DTYPE),tf.constant(bound2,dtype=DTYPE)
@@ -62,6 +66,18 @@ def actionvalider():
     pinn.compile(opt)
     train(epochs,pinn,X_r,X_data,u_data,true_u,N=100,dimension=dimension,batch_size=450)
 
+    """
+    model = pinn.model
+    N = 70
+    fps = 5
+    tspace = np.linspace(lb[0], ub[0], N + 1)
+    plot1d(lb,ub,N,tspace,model,fps)
+    N = 100
+    tspace = np.linspace(lb[0], ub[0], N + 1)
+    plot1dgrid(lb,ub,N,model,0)
+    """
+    
+    fenetre.quit()
 
 ## fenetre tkinter
 fenetre = Tk()
