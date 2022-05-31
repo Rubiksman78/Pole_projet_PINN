@@ -4,6 +4,7 @@ Modelisation of seismic wave propagation with Physics Informed Neural Networks.
 This project aims to simplify the usage of this new technology by proposing an intuitive and easy way to train your own PINN.
 
 ```Yes it is not a dream, you can train your own Neural Network even if you are not an ML scientist !```  
+![PIN](/images/pin.jpg)
 
 # Projet structure
 - models : 
