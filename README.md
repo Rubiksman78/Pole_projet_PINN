@@ -11,7 +11,7 @@ Not this one :
 
 But this one:
 
-![PINN](/images/pinn.jpg)
+![PINN](/images/pinn.png)
 
 # Projet structure
 - models : 
