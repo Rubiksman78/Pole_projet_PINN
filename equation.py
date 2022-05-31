@@ -3,30 +3,46 @@ import numpy as np
 
 DTYPE = 'float32'
 tf.keras.backend.set_floatx(DTYPE)
-### u est la fonction que l'on cherche à modéliser u(t,x) avec t réel (temps) et x un vecteur de R2 ou R3
+
 def u0(t,x):
+    """
+    Input: t,x = time and space points for initial condition
+    Output: u_0(t,x) = solution on initial condition
+    """
     return t + 1*(tf.sin(np.pi*x) + 0.5*tf.sin(4*np.pi*x))
-    #return tf.sin(np.pi*x)
 
-#Speed intial condition
 def v0(t,x,dimension):
+    """
+    Input: t,x = time and space points for speed initial condition
+           dimension = space dimension for model
+    Output: v_0(t,x) = speed on initial condition
+    """
     n = x.shape[0]
-    res = tf.zeros((n,dimension), dtype=DTYPE) #Ici c'est juste v=0 aux bords
+    res = tf.zeros((n,dimension), dtype=DTYPE) 
     return res
 
-#Boundary condition
 def u_bound(t,x,dimension):
+    """
+    Input: t,x = time and space points for boundary condition
+           dimension = space dimension for model
+    Output: u_b(t,x) = solution on boundary condition
+    """
     n = x.shape[0]
-    res = tf.zeros((n,dimension), dtype=DTYPE) #Ici c'est juste u=0 aux bords
+    res = tf.zeros((n,dimension), dtype=DTYPE) 
     return res
 
-#Residual of the PDE
 def residual(t,x,u_t,u_tt,u_xx,c):
-    #return u_t - u_xx + tf.exp(-t)*(tf.sin(np.pi*x)-np.pi**2*np.sin(np.pi*x))
-    return u_tt - (c**2)*u_xx #L'équation est d²u/dx²=(1/c²)*d²u/dt² donc on prend le résidu r=d²u/dx²-(1/c²)*d²u/dt² et on veut r -> 0 
+    """
+    Input: t,x and derivatives of u
+    Ouput : residual of PDE
+    """
+    return u_tt - (c**2)*u_xx
 
-#True solution to compare with prediction
 def true_u(x,a=0.5,c=2):
+    """
+    Input: x and hyperparameters
+    Ouput : true forward solution 
+    """
     t = x[:,0]
     x = x[:,1]
     return np.sin(np.pi * x) * np.cos(c * np.pi * t) + \

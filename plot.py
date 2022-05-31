@@ -8,12 +8,19 @@ from matplotlib.ticker import LinearLocator
 DTYPE = 'float32'
 tf.keras.backend.set_floatx(DTYPE)
 
-###Affichage du résultat dans une grille 2D ou 3D
 def plot2d(lb,ub,N,tspace,model,fps):
+    """
+    Input: lb,ub = boundaries of domain
+           N = number points for simulation
+           tspace : time points 
+           model : pinn model
+           fps : frames per second for gif
+    Output : save and display solution + gif for 2D visualization
+    """
     x1space = np.linspace(lb[1], ub[1], N + 1)
     x2space = np.linspace(lb[2], ub[2], N + 1)
 
-    T,X1, X2 = np.meshgrid(tspace,x1space, x2space) #Découpage d'une grille de points
+    T,X1, X2 = np.meshgrid(tspace,x1space, x2space) #Meshgrid of domain
     Xgrid = tf.stack([T.flatten(),X1.flatten(),X2.flatten()],axis=-1)
 
     # Determine predictions of u(t, x)
@@ -43,7 +50,7 @@ def plot2d(lb,ub,N,tspace,model,fps):
     ax.set_title('Solution of Wave equation')
     fig.colorbar(plot[0])
 
-    plt.rcParams['animation.ffmpeg_path'] = "C:/SAMUEL/ffmpeg-5.0-full_build/ffmpeg-5.0-full_build/bin/ffmpeg.exe" #Faut installer un truc sombre pour faire l'animation vidéo, pas important
+    plt.rcParams['animation.ffmpeg_path'] = "C:/SAMUEL/ffmpeg-5.0-full_build/ffmpeg-5.0-full_build/bin/ffmpeg.exe" 
     anim = animation.FuncAnimation(fig,update_plot,N+1,fargs=(z_array,plot),interval=1000/fps)
     fn = 'plot_surface_animation_funcanimation'
     anim.save(fn+'.gif',writer='ffmpeg',fps=fps)
@@ -51,11 +58,12 @@ def plot2d(lb,ub,N,tspace,model,fps):
 
 
 def plot3d(lb,ub,N,tspace,model,fps):
+    """Same function for 3D"""
     x1space = np.linspace(lb[1], ub[1], N + 1)
     x2space = np.linspace(lb[2], ub[2], N + 1)
-    x3space = np.linspace(lb[3], ub[3], N + 1) #On échantillonne les composantes entre les bords avec N+1 points
+    x3space = np.linspace(lb[3], ub[3], N + 1) 
 
-    T,X1, X2,X3 = np.meshgrid(tspace,x1space, x2space,x3space) #Découpage d'une grille de points
+    T,X1, X2,X3 = np.meshgrid(tspace,x1space, x2space,x3space) #Meshgrid of domain
     Xgrid = tf.stack([T.flatten(),X1.flatten(),X2.flatten(),X3.flatten()],axis=-1)
 
     # Determine predictions of u(t, x)
@@ -79,7 +87,7 @@ def plot3d(lb,ub,N,tspace,model,fps):
     ax.set_zlabel('$x3$')
     ax.set_title('Solution of Wave equation')
 
-    plt.rcParams['animation.ffmpeg_path'] = "C:/SAMUEL/ffmpeg-5.0-full_build/ffmpeg-5.0-full_build/bin/ffmpeg.exe" #Faut installer un truc sombre pour faire l'animation vidéo, pas important
+    plt.rcParams['animation.ffmpeg_path'] = "C:/SAMUEL/ffmpeg-5.0-full_build/ffmpeg-5.0-full_build/bin/ffmpeg.exe" 
     anim = animation.FuncAnimation(fig,update_plot,N+1,fargs=(z_array,plot),interval=1000/fps)
     fn = 'plot_surface_animation_funcanimation'
     anim.save(fn+'.gif',writer='ffmpeg',fps=fps)
@@ -87,7 +95,7 @@ def plot3d(lb,ub,N,tspace,model,fps):
     
 
 def plot1d(lb,ub,N,tspace,model,fps):
-    ###1D Wave
+    """Same function for 1D"""
     x1space = np.linspace(lb[1], ub[1], N + 1)
 
     T,X1 = np.meshgrid(tspace,x1space)
@@ -112,15 +120,20 @@ def plot1d(lb,ub,N,tspace,model,fps):
         plt.plot(x1space,x,color='cyan')
         plt.ylim([-5,5])
         plt.xlim([0,1.0])
-    plt.rcParams['animation.ffmpeg_path'] = "C:/SAMUEL/ffmpeg-5.0-full_build/ffmpeg-5.0-full_build/bin/ffmpeg.exe" #Faut installer un truc sombre pour faire l'animation vidéo, pas important
+    plt.rcParams['animation.ffmpeg_path'] = "C:/SAMUEL/ffmpeg-5.0-full_build/ffmpeg-5.0-full_build/bin/ffmpeg.exe" 
     anim = animation.FuncAnimation(fig,animate,frames=N,interval=20)
     fn = 'plot_1d_animation_funcanimation'
     anim.save(fn+'.gif',writer='ffmpeg',fps=fps)
     plt.show()
 
-#Plot solution and save the fig during the train
 def plot1dgrid(lb,ub,N,model,k):
-    ###1D Wave
+    """
+    Plot grid solution for 1D case (t in x-axis, x in y-axis)
+    Input : lb,ub = boundaries of domain
+            N : number of points for simulation
+            model : PINN model
+            k : number of file to save
+    Output : save figure of grid plot"""
     x1space = np.linspace(lb[1], ub[1], N + 1)
     tspace = np.linspace(lb[0], ub[0], N + 1)
 
@@ -143,9 +156,9 @@ def plot1dgrid(lb,ub,N,model,k):
     plt.savefig(f'results/generated_{k}')
     plt.close()
 
-#Plot solution and save the fig during the train
+
 def plot1dgrid_real(lb,ub,N,model,k):
-    ###1D Wave
+    """Same for the real solution"""
     x1space = np.linspace(lb[1], ub[1], N + 1)
     tspace = np.linspace(lb[0], ub[0], N + 1)
 
