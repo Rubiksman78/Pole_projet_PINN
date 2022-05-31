@@ -3,9 +3,21 @@ from tkinter import *
 from turtle import width
 import numpy as np
 from pyparsing import col 
+from pinn_code import *
 from pinn_code import train
 from models.model import *
 from utils.plot import * 
+
+#lecture de l'équation entrée par l'utilisateur
+def cos(a):
+    return np.cos(a)
+
+def sin(a):
+    return np.sin(a)
+
+def readequa(x, y=0, z=0):
+    equation = str(entreeequ.get())
+    return eval(equation, globals(), locals())
 
 #action des boutons du cadre de l'équation
 def actionbuttonplus():
@@ -21,7 +33,7 @@ def actionbuttoncos():
     valueequa.set(entreeequ.get() + 'cos (')
 
 def actionbuttonsquare():
-    valueequa.set(entreeequ.get() + ') ^ 2')
+    valueequa.set(entreeequ.get() + ' ** 2')
 
 def actionbuttonopen():
     valueequa.set(entreeequ.get() + '(')
@@ -125,7 +137,7 @@ buttonsin = Button(up, text = 'sin', command= actionbuttonsin, width = 3)
 buttonsin.pack(side = LEFT)
 buttoncos = Button(up, text = 'cos', command= actionbuttoncos, width = 3)
 buttoncos.pack(side = LEFT)
-buttonsquare = Button(up, text = '^2', command= actionbuttonsquare, width = 3)
+buttonsquare = Button(up, text = '**2', command= actionbuttonsquare, width = 3)
 buttonsquare.pack(side = LEFT)
 buttonopen = Button(down, text = '(', command= actionbuttonopen, width = 3)
 buttonopen.pack(side = LEFT)
@@ -221,31 +233,4 @@ top.pack(side=TOP)
 bottom.pack(side= BOTTOM)
 
 fenetre.mainloop()
-
-
-"""def readequa(x, y=0, z=0):
-    string = entreeequ.get()
-    string = string.split(' ')
-    r =[]
-    for i in range(len(string)) :
-        if string[i] == 'sin':
-            r.append (np.sin)
-        elif string[i] == 'cos':
-            r.append(np.cos)
-        elif 
-        else :
-            try : int(string[i])
-            except : r.append
-            else : """
-        
-    
-    
-    
-    
-
-
-
-
-
-
 
