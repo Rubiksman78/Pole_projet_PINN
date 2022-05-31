@@ -7,11 +7,13 @@ This project aims to simplify the usage of this new technology by proposing an i
 
 # Projet structure
 - models : 
+
 -> kernel_upgrade : implementation of NTK method
 
 -> model : neural network model and train step
 
 - physics : 
+
 -> equation : PDE and boundary conditions
 
 -> initial : setting of all training points
@@ -19,9 +21,11 @@ This project aims to simplify the usage of this new technology by proposing an i
 - results
 
 - utils : 
+
 -> plot : plotting functions in 1D, 2D or 3D
 
 - root : 
+
 -> interface : training with Tkinter interface for parameters
 
 -> pinn_code : training with parser and command line for long experiments
