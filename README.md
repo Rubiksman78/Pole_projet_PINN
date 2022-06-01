@@ -53,7 +53,7 @@ Install FFMPEG from their [website](https://www.ffmpeg.org/download.html)
 
 # How to use it
 
-## I don't like command line 
+## I don't like command line because ML is too dark for me 
 You don't like to use your command line with dozens of arguments, just use the interface we've made for you.
 ```
 python interface.py
@@ -62,7 +62,7 @@ Enter the conditions and the parameters you want for your equation as well as th
 Wait until your PINNis finished training.
 Admire the result.
 
-## You want to do more experiments
+## I want to do more experiments because I'm doing ML since 5 years old
 Just go to the config.py file and modify the parameters for the training or launch the main file with
 ```
 python pinn_code.py -epochs=100 ...
