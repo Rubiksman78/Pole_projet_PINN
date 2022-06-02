@@ -1,12 +1,15 @@
 from calendar import c
 from tkinter import *
 from turtle import width
+from wsgiref import validate
 import numpy as np
 from pyparsing import col 
 from pinn_code import *
 from pinn_code import train
 from models.model import *
 from utils.plot import * 
+from tkinter import messagebox
+
 
 #lecture de l'équation entrée par l'utilisateur
 def cos(a):
@@ -17,40 +20,48 @@ def sin(a):
 
 def readequa(x, y=0, z=0):
     equation = str(entreeequ.get())
-    return eval(equation, globals(), locals())
+    if len(equation)!=0:
+        return eval(equation, globals(), locals())
+    else :
+        return cos(x)
 
 #action des boutons du cadre de l'équation
 def actionbuttonplus():
-    valueequa.set(entreeequ.get() + ' + ')
+    entreeequ.insert('insert', ' + ')
 
 def actionbuttonminus():
-    valueequa.set(entreeequ.get() + ' - ')
+    entreeequ.insert('insert', ' - ')
 
 def actionbuttonsin():
-    valueequa.set(entreeequ.get() + 'sin (')
+    entreeequ.insert('insert', ' sin(')
 
 def actionbuttoncos():
-    valueequa.set(entreeequ.get() + 'cos (')
+    entreeequ.insert('insert', ' cos(')
 
 def actionbuttonsquare():
-    valueequa.set(entreeequ.get() + ' ** 2')
+    entreeequ.insert('insert', ' **2 ')
 
 def actionbuttonopen():
-    valueequa.set(entreeequ.get() + '(')
+    entreeequ.insert('insert', '(')
 
 def actionbuttonclose():
-    valueequa.set(entreeequ.get() + ')')
+    entreeequ.insert('insert', ')')
 
 def actionbuttonx():
-    valueequa.set(entreeequ.get() + 'x')
+    entreeequ.insert('insert', 'x')
 
 def actionbuttony():
     if int(entreedim.get()) >= 2 :
-        valueequa.set(entreeequ.get() + 'y')
+        entreeequ.insert('insert', 'y')
+    else:
+        messagebox.showinfo("Erreur", "Dimension insuffisante, augmenter la dimension pour ajouter un paramètre")
 
 def actionbuttonz():
     if int(entreedim.get()) == 3 :
-        valueequa.set(entreeequ.get() + 'z')
+        entreeequ.insert('insert', 'z')
+    else:
+        messagebox.showinfo("Erreur", "Dimension insuffisante, augmenter la dimension pour ajouter un paramètre")
+
 
 def actionvalider():
     c,a,dimension,tmin,tmax,xmin,xmax,N_b,N_r,N_0,lr,epochs = int(entreec.get()), 0.5, int(entreedim.get()), 0., 1., 0., 1., int(entreeNb.get()), int(entreeNr.get()), int(entreeN0.get()), float(entreelr.get())*1e-5, int(entreeepochs.get())
@@ -116,11 +127,12 @@ l.pack(fill="both", expand="yes", side= TOP)
 Label(l).pack()
 
 #cadre conditionsinit
-equa = LabelFrame(cadreentree, text="conditions initiales", padx=20, pady=5)
+equa = LabelFrame(cadreentree, text="conditions initiales (Optionnel)", padx=20, pady=5)
 valueequa = StringVar()
 valueequa.set('')
 entreeequ = Entry(equa, textvariable=valueequa, width = 30)
 entreeequ.pack(side= TOP, padx = 10, pady = 10)
+
 
 #bouton pour écrire
 bout = Frame(equa)

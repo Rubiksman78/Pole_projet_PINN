@@ -53,7 +53,7 @@ Install FFMPEG from their [website](https://www.ffmpeg.org/download.html)
 
 # How to use it
 
-## I don't like command line 
+## I don't like command line because ML is too dark for me 
 You don't like to use your command line with dozens of arguments, just use the interface we've made for you.
 ```
 python interface.py
