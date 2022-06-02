@@ -59,11 +59,11 @@ You don't like to use your command line with dozens of arguments, just use the i
 python interface.py
 ```
 Enter the conditions and the parameters you want for your equation as well as the hyperparameters for your Neural Network.
-Wait until your PINNis finished training.
+Wait until your PINN is finished training.
 Admire the result.
 
 ## You want to do more experiments
-Just go to the config.py file and modify the parameters for the training or launch the main file with
+Just go to the config.py file and modify the parameters for the training then launch the main file with
 ```
 python pinn_code.py -epochs=100 ...
 ```

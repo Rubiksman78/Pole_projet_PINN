@@ -10,6 +10,7 @@ def u0(t,x):
     Output: u_0(t,x) = solution on initial condition
     """
     return t + 1*(tf.sin(np.pi*x) + 0.5*tf.sin(4*np.pi*x))
+    #return t + tf.sin(np.pi*x) * tf.exp(-x*x/4)
 
 def v0(t,x,dimension):
     """

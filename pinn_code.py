@@ -14,14 +14,16 @@ DTYPE = 'float32'
 tf.keras.backend.set_floatx(DTYPE)
 
 #Training loop
-def train(epochs,pinn,X_r,X_data,u_data,f_real,N,dimension,batch_size,render_bar=True,val_ratio = 0.1):
-    hist = []
+def train(epochs,pinn,X_r,X_data,u_data,f_real,N,dimension,batch_size,render_bar=True,val_ratio = 0.1,begin_from = 80000):
+    losses = []
+    val_losses = []
     t0 = time()
 
     #Setting validation dataset size
     total_size = tf.shape(X_r)[0].numpy()
     val_size = (val_ratio * total_size).astype(int)
     if batch_size > total_size - val_size:
+        print(total_size - val_size)
         raise ValueError("Batch size > train size")
     
     #Setting train and validation data
@@ -29,6 +31,9 @@ def train(epochs,pinn,X_r,X_data,u_data,f_real,N,dimension,batch_size,render_bar
     X_test = tf.concat([X_r[-val_size:],X_data_test],axis=0)
     X_r,X_data,u_data = X_r[:-val_size],[x[:-val_size] for x in X_data],[x[:-val_size] for x in u_data]
     num_steps = (np.ceil(tf.shape(X_r)[0].numpy())/batch_size).astype(int)
+
+    val_loss = pinn.test_step(X_test,f_real)
+    val_losses.append(val_loss)
 
     if render_bar:
             progress_bar = tqdm(range(epochs+1))
@@ -50,15 +55,16 @@ def train(epochs,pinn,X_r,X_data,u_data,f_real,N,dimension,batch_size,render_bar
             hist.append(loss_j.numpy()) 
             loss += loss_j
         loss = loss / num_steps
-
+        losses.append(loss)
         #Rendering training metrics 
         if render_bar:
             progress_bar.set_description(f"Epoch {i}: Loss= {loss}")
-            if (i+1) % 1000 == 0:
+            if (i+1) % 50 == 0:
                 val_loss = pinn.test_step(X_test,f_real)
-                print(f"Epoch {i}: val_loss : {val_loss}")
+                val_losses.append(val_loss)
+                #print(f"Epoch {i}: val_loss : {val_loss}")
         
-        if (i+1) % 2000 == 0:
+        if (i+1) % 10000 == 0:
                 print(f'It {i}: residual_loss = {loss_r}\
                     | initial_loss = {loss_i}\
                     | boundary_loss_x = {loss_b1}\
@@ -67,14 +73,15 @@ def train(epochs,pinn,X_r,X_data,u_data,f_real,N,dimension,batch_size,render_bar
                     | lambda_bv = {lambda_bv}\
                     | lambda_r = {lambda_r}')
         
-        
         if (i+1) % 1000 ==0:
-            pinn.model.save_weights('weights/pinn10.h5')
-        if (i+1) % 500 ==0:
+            pinn.model.save_weights('results/pinn200.h5') #Change name file for another train
+        if (i+1) % 2000 ==0:
             if dimension == 1:
-                plot1dgrid(lb,ub,N,pinn.model,i+620000)
+                plot1dgrid(lb,ub,N,pinn.model,i+begin_from)
+        if (i+1) % 50 ==0:
+            plot_curve(i,losses,val_losses,'plot2.png')
     print('\nComputation time: {} seconds'.format(time()-t0))
-    return hist
+    return losses,val_losses
 
 #Multiple trainings for different number of points
 def multi_train():
@@ -137,9 +144,9 @@ if __name__ == '__main__':
     hist = []
     pinn = PINN(dimension+1,1,dimension,ub,lb,c)
     pinn.compile(opt)
-    #pinn.model.load_weights('weights/pinn9.h5')
-    batch_size_max = int(0.3*0.9*N_b)
-    train(epochs,pinn,X_r,X_data,u_data,true_u,N=100,dimension=dimension,batch_size=270)
+    pinn.model.load_weights('results/pinn100.h5')
+    batch_size_max = int(0.1*0.9*N_b) #30% of train dataset
+    train(epochs,pinn,X_r,X_data,u_data,true_u,N=100,dimension=dimension,batch_size=batch_size_max)
 
     #Test
     model = pinn.model

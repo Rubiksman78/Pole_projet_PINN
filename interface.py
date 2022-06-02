@@ -66,7 +66,6 @@ def actionvalider():
     pinn.compile(opt)
     train(epochs,pinn,X_r,X_data,u_data,true_u,N=100,dimension=dimension,batch_size=450)
 
-    """
     model = pinn.model
     N = 70
     fps = 5
@@ -75,8 +74,6 @@ def actionvalider():
     N = 100
     tspace = np.linspace(lb[0], ub[0], N + 1)
     plot1dgrid(lb,ub,N,model,0)
-    """
-    
     fenetre.quit()
 
 ## fenetre tkinter

@@ -1,4 +1,9 @@
-__pycache___
+__pycache__
 results
 weights
 vrac
+results1
+models/__pycache__
+physics/__pycache__
+utils/__pycache__
+plot.jpg

@@ -6,7 +6,7 @@ from physics.initial import *
 from models.kernel_upgrade import *
 
 
-def define_net(num_inputs,num_outputs,ub,lb,n_layers = 6, n_neurons = 64):
+def define_net(num_inputs,num_outputs,ub,lb,n_layers = 8, n_neurons = 512):
     """
     Neural network architecture for PINN
     Input : num_inputs = dimension of input vector
@@ -111,7 +111,7 @@ class PINN(models.Model):
                 u_pred = self.model(X_data[i]) 
                 loss_i += tf.reduce_mean(tf.square(u_data[i]-u_pred)) 
             else:
-                #Loss boundary speed condition
+                #Loss initial speed condition
                 with tf.GradientTape() as tape: 
                     t = X_data[i][:,0]
                     tape.watch(t)
@@ -122,10 +122,10 @@ class PINN(models.Model):
         return loss_i,loss_b1,loss_b2,phi_r
 
 
-    def train_step(self,X_r,X_data,u_data,i,use_kernel = False):
+    def train_step(self,X_r,X_data,u_data,i,use_kernel = True):
         with tf.GradientTape() as tape:
             #Computing lambda coefficients
-            if use_kernel and (i+1) % 100 ==0:
+            if use_kernel and (i+1) % 500 ==0:
                 Ju = compute_Ju(tf.concat([X_data[0],X_data[1]],axis=0),self.model)
                 Jr = compute_Jr(X_r,self.model,self.c,self.dimension)
                 Jut = compute_Ju(X_data[2],self.model)

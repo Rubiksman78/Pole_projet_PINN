@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from matplotlib import cm
 from matplotlib.ticker import LinearLocator
-
+from IPython.display import clear_output
 DTYPE = 'float32'
 tf.keras.backend.set_floatx(DTYPE)
 
@@ -180,3 +180,20 @@ def plot1dgrid_real(lb,ub,N,model,k):
     ax.set_ylabel('$x1$')
     plt.savefig(f'results/generated_{k}')
     plt.close()
+
+def plot_curve(
+        epoch,
+        train_loss,
+        val_loss,
+        filename
+    ):
+        clear_output(True)
+        plt.figure(figsize=(20, 5))
+        plt.subplot(121)
+        plt.title('Epoch %s. train_loss: %s' % (epoch, np.mean(train_loss[-10:])))
+        plt.plot(train_loss)
+        plt.subplot(122)
+        plt.title('val_loss: %s' % (np.mean(val_loss[-1])))
+        plt.plot(val_loss)
+        plt.savefig(filename)
+        plt.close()
