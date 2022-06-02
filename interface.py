@@ -11,7 +11,7 @@ from utils.plot import *
 from tkinter import messagebox
 
 
-#lecture de l'équation entrée par l'utilisateur
+#Reading user equation
 def cos(a):
     return np.cos(a)
 
@@ -25,7 +25,7 @@ def readequa(x, y=0, z=0):
     else :
         return cos(x)
 
-#action des boutons du cadre de l'équation
+#Button actions from equation window
 def actionbuttonplus():
     entreeequ.insert('insert', ' + ')
 
@@ -87,7 +87,7 @@ def actionvalider():
     plot1dgrid(lb,ub,N,model,0)
     fenetre.quit()
 
-## fenetre tkinter
+## tkinter window
 fenetre = Tk()
 fenetre.title('PINN')
 
@@ -99,10 +99,10 @@ cadreentree = Frame(top, border = 2)
 valider=Button(bottom, text="Valider", command=actionvalider)
 valider.pack()
 
-#cadre paramètres
+#parameters window
 l = LabelFrame(cadreentree, text="paramètres", padx=20, pady=5)
 
-#sous-cadre pour récupérer c
+#sub-window to get c
 zonec = Frame(l)
 labelc = Label(zonec, text="c :")
 labelc.pack(side= LEFT)
@@ -113,7 +113,7 @@ entreec.pack(side = RIGHT, padx= 15)
 zonec.pack(fill="both", expand="yes", side = LEFT)
 
 
-#sous-cadre pour récupérer dim
+#sub-window to get dim
 zonedim = Frame(l)
 labeldim = Label(zonedim, text="dimension :")
 labeldim.pack(side = LEFT)
@@ -126,7 +126,7 @@ zonedim.pack(fill="both", expand="yes", side = LEFT)
 l.pack(fill="both", expand="yes", side= TOP)
 Label(l).pack()
 
-#cadre conditionsinit
+#intial conditions window
 equa = LabelFrame(cadreentree, text="conditions initiales (Optionnel)", padx=20, pady=5)
 valueequa = StringVar()
 valueequa.set('')
@@ -134,7 +134,7 @@ entreeequ = Entry(equa, textvariable=valueequa, width = 30)
 entreeequ.pack(side= TOP, padx = 10, pady = 10)
 
 
-#bouton pour écrire
+#button to write
 bout = Frame(equa)
 up = Frame(bout)
 down = Frame(bout)
@@ -174,7 +174,7 @@ cadreentree.pack(side = LEFT)
 cadredroit = Frame(top, border = 2, width = 50)
 l2 = LabelFrame(cadredroit, text="paramètres d'apprentissage", padx=20, pady=8)
 
-#sous-cadre pour récupérer épochs
+#sub-window to get epochs
 zoneepochs = Frame(l2)
 labelepochs = Label(zoneepochs, text="Nombre d'épochs :")
 labelepochs.pack(side= LEFT)
@@ -184,7 +184,7 @@ valueepochs.set('1000')
 entreeepochs.pack(side = RIGHT, padx= 10)
 zoneepochs.pack(fill="both", expand="yes", side = TOP)
 
-#sous-cadre pour récupérer lr
+#sub-window to get lr
 zonelr = Frame(l2)
 labellr = Label(zonelr, text="Pas d'apprentissage :")
 labellr.pack(side= LEFT)
@@ -201,7 +201,7 @@ zonelr.pack(fill="both", expand="yes", side = BOTTOM)
 
 l2.pack(fill="both", expand="yes", side= TOP)
 
-#sous-cadre pour récupérer Nb, N0, Nr
+#sub-window to get Nb, N0, Nr
 Ns= LabelFrame(cadredroit, text="paramètres de représentation", padx=20, pady=5)
 topNs = Frame(Ns)
 zoneNb = Frame(topNs)

@@ -52,7 +52,6 @@ def train(epochs,pinn,X_r,X_data,u_data,f_real,N,dimension,batch_size,render_bar
             loss_i,loss_b1,loss_b2,loss_r,lambda_b,lambda_bv,lambda_r = \
                 pinn.train_step(X_rj,X_dataj,u_dataj,i) #Calling train step on batch
             loss_j = loss_i + loss_b1 + loss_b2 + loss_r 
-            hist.append(loss_j.numpy()) 
             loss += loss_j
         loss = loss / num_steps
         losses.append(loss)
@@ -145,7 +144,7 @@ if __name__ == '__main__':
     pinn = PINN(dimension+1,1,dimension,ub,lb,c)
     pinn.compile(opt)
     pinn.model.load_weights('results/pinn100.h5')
-    batch_size_max = int(0.1*0.9*N_b) #30% of train dataset
+    batch_size_max = int(0.9*N_b) #30% of train dataset
     train(epochs,pinn,X_r,X_data,u_data,true_u,N=100,dimension=dimension,batch_size=batch_size_max)
 
     #Test

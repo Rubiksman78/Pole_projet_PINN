@@ -62,7 +62,7 @@ Enter the conditions and the parameters you want for your equation as well as th
 Wait until your PINN is finished training.
 Admire the result.
 
-## You want to do more experiments
+## I want to do more experiments because I am a pro ML engineer
 Just go to the config.py file and modify the parameters for the training then launch the main file with
 ```
 python pinn_code.py -epochs=100 ...
