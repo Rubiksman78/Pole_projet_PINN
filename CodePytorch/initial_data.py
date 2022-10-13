@@ -14,8 +14,7 @@ from torch.autograd import Variable, grad
 # Calculer la n-ieme dérivée d'une fonction
 def nth_gradient(f, wrt,n):  # f est la fonction, wrt est la variable par rapport à laquelle on dérive
     for i in range(n):
-        grads = grad(f, wrt, create_graph=True)[
-            0]  # on dérive f par rapport à wrt
+        grads = grad(f, wrt, create_graph=True)[0]  # on dérive f par rapport à wrt
         f = grads
         if grads is None:
             print("Bad Gradient")
